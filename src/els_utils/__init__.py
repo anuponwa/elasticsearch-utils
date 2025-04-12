@@ -1,2 +1,4 @@
-def main() -> None:
-    print("Hello from els-utils!")
+from .els import ELS
+from .version import __version__
+
+__all__ = ["ELS"]
