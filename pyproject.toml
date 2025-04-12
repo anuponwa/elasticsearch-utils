@@ -1,0 +1,20 @@
+[project]
+name = "els-utils"
+version = "0.1.0"
+description = "A simple wrapper for Elasticsearch tool"
+readme = "README.md"
+authors = [
+    { name = "Anupong Wannakrairot", email = "anuponwa@scg.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=2.0.0",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+els-utils = "els_utils:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
