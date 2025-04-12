@@ -1,7 +1,21 @@
-from typing import Any
+import re
+from typing import Any, Literal, TypedDict
 
 import pandas as pd
 from requests import Response
+
+
+class DetailsDict(TypedDict):
+    value: float
+    description: str
+    details: list["DetailsDict"]
+
+
+class FieldScoreDict(TypedDict):
+    field: str
+    clause: str
+    type: Literal[r"value", "boost", "idf", "tf"]
+    value: int | float
 
 
 class SearchResults:
@@ -34,7 +48,7 @@ class SearchResults:
         self, include_id: bool = False, include_score: bool = False
     ) -> list[dict[str, Any] | None]:
         """Returns a list of _source dict results
-        
+
         Parameters
         ----------
             - include_id (bool): Whether or not to include `_id` in the results
@@ -96,3 +110,51 @@ class SearchResults:
 
     def __repr__(self):
         return f"<SearchResults total_hits={self.total}>"
+
+
+class ExplainResult:
+    def __init__(self, response):
+        self._response = response
+        self._json = response.json()
+
+    @property
+    def explanation(self) -> dict:
+        return self._json.get("explanation", {})
+
+    @property
+    def score(self) -> float | None:
+        return self.explanation.get("value")
+
+    def get_breakdown(self):
+        result = []
+
+        def walk(node, depth=0):
+            desc = node.get("description", "")
+            val = node.get("value", 0)
+            result.append((depth, val, desc))
+            for detail in node.get("details", []):
+                walk(detail, depth + 1)
+
+        walk(self.explanation)
+        return result
+
+    # def _flatten(self, explanation):
+    #     result = []
+
+    #     def walk(node, depth=0):
+    #         desc = node.get("description", "")
+    #         val = node.get("value", 0)
+    #         result.append((depth, val, desc))
+    #         for detail in node.get("details", []):
+    #             walk(detail, depth + 1)
+
+    #     walk(explanation)
+    #     return result
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            self.get_breakdown(), columns=["depth", "score", "description"]
+        )
+
+    def __repr__(self):
+        return f"<ExplainResult explanation_value={self.score}>"

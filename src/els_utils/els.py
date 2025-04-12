@@ -6,7 +6,7 @@ from typing import Literal
 import requests
 
 from .response import RequestResponse
-from .results import SearchResults
+from .results import SearchResults, ExplainResult
 
 
 class ELS:
@@ -17,7 +17,7 @@ class ELS:
         basic_auth: tuple[str, str] | None = None,
     ):
         """Initialise Elasticsearch tool object
-        
+
         Parameters
         ----------
             - es_endpoint (str): URL endpoint of the Elasticsearch cluster
@@ -102,7 +102,7 @@ class ELS:
 
     def delete_index(self, index_name: str):
         """Deletes an index, if available
-        
+
         Parameters
         ----------
             - index_name (str): Index name to delete
@@ -129,7 +129,7 @@ class ELS:
         self, index_name: str, json_mapping: dict, replace_if_exists: bool = True
     ):
         """Creates an index with a specified mapping
-        
+
         Parameters
         ----------
             - index_name (str): Index name to create
@@ -206,7 +206,7 @@ class ELS:
         refresh: Literal["true", "wait_for"] = "true",
     ):
         """Bulk index/update documents
-        
+
         Parameters
         ----------
             - index_name (str): Index name to update to
@@ -266,7 +266,7 @@ class ELS:
 
     def search(self, index_name: str, dsl: dict) -> SearchResults:
         """Search API to a speicified index and DSL query
-        
+
         Parameters
         ----------
             - index_name (str): Index name to search from
@@ -280,7 +280,7 @@ class ELS:
         Example
         -------
             Example of using the results object retrieved from the `search()`
-            
+
             ```
             dsl = {"query": {"match": ...}}
             results = els.search("my_index", dsl)
@@ -299,6 +299,45 @@ class ELS:
         results = requests.post(url=es_url, headers=headers, data=json.dumps(dsl))
         search_results = SearchResults(results)
         return search_results
+
+    def explain(
+        self,
+        index_name: str,
+        doc_id: str,
+        dsl: dict,
+        routing: str | None = None,
+    ) -> ExplainResult:
+        """Explain API to a specified index and DSL query
+
+        Parameters
+        ----------
+            - index_name (str): Index name to search from
+
+            - doc_id (str): The document's `_id` to be explained by the DSL query
+
+            - dsl (dict): A DSL query
+
+            - routing (str | None): The routing (shard) name, if routing is required (Default = None)
+
+        Returns
+        -------
+            ExplainResult object
+        """
+
+        self._check_authen()
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_explain", doc_id)
+        params = {"routing": routing} if routing else {}
+
+        headers = self.headers.copy()
+        headers["Content-Type"] = "application/json"
+
+        dsl = {"query": dsl["query"]}
+
+        results = requests.get(
+            es_url, params=params, headers=headers, data=json.dumps(dsl)
+        )
+        return ExplainResult(results)
 
     def _check_authen(self):
         if not self.is_authen:
