@@ -1,10 +1,10 @@
 from typing import Literal, TypedDict
 
 
-class DetailsDict(TypedDict):
+class ExplainDetailsDict(TypedDict):
     value: float
     description: str
-    details: list["DetailsDict"]
+    details: list["ExplainDetailsDict"]
 
 
 class FieldScoreDict(TypedDict):

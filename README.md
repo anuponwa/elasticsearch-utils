@@ -1,0 +1,110 @@
+# els-utils
+
+This library provides utilities for interacting with Elasticsearch and results retrived from it.
+
+The core features are:
+- Index creation (even if already exists)
+- Index deletion
+- Search (can include `explain: True` in the DSL query)
+- Explain
+
+## Installation
+
+```
+uv add els-utils
+```
+
+## Example usage
+
+### Instantiate
+```python
+from els_utils import ELS
+
+
+# Using API key to authenticate
+els = ELS(ES_ENDPOINT, api_key=ES_API_KEY)
+
+# Using basic authen with username and password
+els = ELS(ES_ENDPOINT, basic_authen=(USERNAME, PASSWORD))
+```
+### Create index
+```python
+mapping = {"mappings": {"properties": {...}}}
+
+els.create_index(index_name="my-index", json_mapping=mapping, replace_if_exists=True)
+```
+
+### Bulk update
+```python
+data = [{"some-id": "1", "field1": "some-value"}, {"some-id": "2", "field1": "another-value"}]
+
+els.bulk_update(index_name="my-index", data=data, id_key="some-id")
+
+# Routing option is also available if needed
+els.bulk_update(index_name="my-index", data=data, id_key="some-id", routing_key="1")
+```
+
+### Results
+
+```python
+dsl = {"query": {...}}
+results = els.search(INDEX_NAME, dsl)
+
+# results: <SearchResults total_hits=510>
+
+# Get the JSON
+results.json
+
+# Get the hits
+result.hits
+
+# Get the sources
+results.get_sources(as_list=False)  # as_list can be `True` if you wish to get just a list of sources
+
+# Get results in a DataFrame format
+results.to_dataframe()
+
+# You can also pass in just the columns you want
+results.to_dataframe(columns=["field1"])
+
+# If explain: True was passed in the DSL, you can also get explanations
+results.get_explanations()  # This returns a dict of {`_id`: `<ExplainResult>`}
+```
+
+### Explanation
+
+#### Using the `explain` API
+```python
+dsl = {"query": {...}}
+explain = els.explain(INDEX_NAME, doc_id="75720", dsl=dsl, routing=None)
+
+# Get the JSON
+explain.json
+
+# Get score
+explain.score
+
+# Get the explanation dict
+explain.explanation
+
+# Get scores breakdown
+explain.get_scores_breakdown(as_df=False)  # If you wish to return a DataFrame, can pass `as_df=True`
+
+# Get the scores terms, e.g., tf, idf, boost for each field
+explain.get_scores_term(as_df=False)
+
+# Get the contributions summary for each field
+explain.get_scores_summary()  # You can also pass in `as_df` parameter
+```
+
+#### Using the explanation from the `search` API
+```python
+dsl = {"explain": True, "query": {...}}
+results = els.search(INDEX_NAME, dsl=dsl)
+
+# This returns a dict of {`_id`: `<ExplainResult>`}
+explanations = results.get_explanations()
+
+# You can do the same thing as the `ExplainResult` for each item
+explanations["75720"].get_scores_term()  # Given that the key "75720" exists in the results
+```

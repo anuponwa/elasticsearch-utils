@@ -1,11 +1,11 @@
 import math
 import re
 
-from .types import DetailsDict, FieldScoreDict, ScoreSummaryDict
+from .types import ExplainDetailsDict, FieldScoreDict, ScoreSummaryDict
 
 
-def _get_score_details(
-    dict_or_details_list: list[DetailsDict] | DetailsDict,
+def get_scores_terms(
+    dict_or_details_list: list[ExplainDetailsDict] | ExplainDetailsDict,
     results: list = None,
     field_name: str = None,
     clause: str = None,
@@ -72,11 +72,11 @@ def _get_score_details(
                 )
 
         for detail in dict_or_details_list.get("details", []):
-            _get_score_details(detail, results, field_name, clause)
+            get_scores_terms(detail, results, field_name, clause)
 
     elif isinstance(dict_or_details_list, list):
         for item in dict_or_details_list:
-            _get_score_details(item, results, field_name, clause)
+            get_scores_terms(item, results, field_name, clause)
 
     return results
 
