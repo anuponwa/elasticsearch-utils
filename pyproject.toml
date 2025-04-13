@@ -1,6 +1,6 @@
 [project]
 name = "els-utils"
-version = "0.1.0"
+version = "0.2.0"
 description = "A simple wrapper for Elasticsearch tool"
 readme = "README.md"
 authors = [
@@ -11,9 +11,6 @@ dependencies = [
     "pandas>=2.0.0",
     "requests>=2.32.3",
 ]
-
-[project.scripts]
-els-utils = "els_utils:main"
 
 [build-system]
 requires = ["hatchling"]
