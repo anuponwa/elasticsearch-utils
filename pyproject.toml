@@ -1,6 +1,6 @@
 [project]
 name = "els-utils"
-version = "0.2.0"
+version = "0.3.0"
 description = "A simple wrapper for Elasticsearch tool"
 readme = "README.md"
 authors = [

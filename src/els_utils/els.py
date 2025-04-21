@@ -126,7 +126,7 @@ class ELS:
             )
 
     def create_index(
-        self, index_name: str, json_mapping: dict, replace_if_exists: bool = True
+        self, index_name: str, json_mapping: dict, replace_if_exists: bool = False
     ):
         """Creates an index with a specified mapping
 
@@ -136,7 +136,7 @@ class ELS:
 
             - json_mapping (dict): A dictionary mapping for the index
 
-            - replace_if_exists (bool): Whether or not to delete and re-create a new index if already exists (Default = True)
+            - replace_if_exists (bool): Whether or not to delete and re-create a new index if already exists (Default = False)
 
         Returns
         -------
