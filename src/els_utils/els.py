@@ -260,7 +260,7 @@ class ELS:
         print("Finished updating all batches.")
         r = RequestResponse(
             status_code=200,
-            content=f'{"message": "All chunks are updated successfully."}',
+            content=json.dumps({"message": "All chunks are updated successfully."}),
         )
         return r
 

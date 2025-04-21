@@ -1,4 +1,6 @@
 # Change log
+## 0.3.1
+* Fix return json content error
 
 ## 0.3.0
 * Change `replace_if_exists` to `False` by default when creating an index
