@@ -1,4 +1,7 @@
 # Change log
+## 0.3.4
+* Fix bulk update/index methods
+
 ## 0.3.3
 * Add bulk index
 

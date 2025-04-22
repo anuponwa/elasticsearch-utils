@@ -169,7 +169,12 @@ class ELS:
         return create_response
 
     @staticmethod
-    def generate_bulk_payload(index_name: str, data: list[dict], id_key: str | None):
+    def generate_bulk_payload(
+        index_name: str,
+        data: list[dict],
+        method: Literal["index", "update"] = "index",
+        id_key: str | None = None,
+    ):
         """Generates bulk payload data, for _bulk API"""
 
         bulk_data = ""
@@ -178,9 +183,9 @@ class ELS:
             # First row of the bulk
             if id_key is not None:
                 _id = item[id_key]
-                action = {"update": {"_index": index_name, "_id": _id}}
+                action = {method: {"_index": index_name, "_id": _id}}
             else:
-                action = {"update": {"_index": index_name}}
+                action = {method: {"_index": index_name}}
 
             # Second row (actual data) of the bulk
             bulk_data += f"{json.dumps(action)}\n{json.dumps({'doc': item, 'doc_as_upsert': True})}\n"
@@ -220,7 +225,7 @@ class ELS:
 
         self._check_authen()
 
-        es_url = ppath.join(self.es_endpoint, index_name, "_index")
+        es_url = ppath.join(self.es_endpoint, index_name, "_bulk")
         es_url += f"?refresh={refresh}"
 
         if routing_key:
@@ -230,7 +235,7 @@ class ELS:
         while i < len(data):
             data_chunk = data[i : i + chunk_size]
             bulk_payload = self.generate_bulk_payload(
-                index_name, data_chunk, id_key=id_key
+                index_name, data_chunk, method="index", id_key=id_key
             )
 
             headers = self.headers.copy()
@@ -298,7 +303,7 @@ class ELS:
         while i < len(data):
             data_chunk = data[i : i + chunk_size]
             bulk_payload = self.generate_bulk_payload(
-                index_name, data_chunk, id_key=id_key
+                index_name, data_chunk, method="update", id_key=id_key
             )
 
             headers = self.headers.copy()
