@@ -188,7 +188,10 @@ class ELS:
                 action = {method: {"_index": index_name}}
 
             # Second row (actual data) of the bulk
-            bulk_data += f"{json.dumps(action)}\n{json.dumps({'doc': item, 'doc_as_upsert': True})}\n"
+            if method == "update":
+                bulk_data += f"{json.dumps(action)}\n{json.dumps({'doc': item, 'doc_as_upsert': True}, ensure_ascii=False).encode('utf-8')}\n"
+            else:
+                bulk_data += f"{json.dumps(action)}\n{json.dumps(item, ensure_ascii=False).encode('utf-8')}\n"
 
         return bulk_data
 
