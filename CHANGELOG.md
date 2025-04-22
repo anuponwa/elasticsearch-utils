@@ -1,4 +1,7 @@
 # Change log
+## 0.3.3
+* Add bulk index
+
 ## 0.3.2
 * Add support for default reindexing with `_id=None`
 

@@ -191,19 +191,76 @@ class ELS:
         self,
         index_name: str,
         data: list[dict],
-        id_key: str,
+        id_key: str | None = None,
         routing_key: str | None = None,
         chunk_size: int = 10,
         refresh: Literal["true", "wait_for"] = "true",
     ):
+        """Bulk index/update documents
+
+        Parameters
+        ----------
+            - index_name (str): Index name to update to
+
+            - data (list[dict]): A list of dictionary data to update to the index
+
+            - id_key (str | None): Key of the dictionary data to use for documents' `_id` (Default = None)
+                If None is provided, it will auto increment
+
+            - routing_key (str | None): Routing name (shard) for all the data in this batch (Default = None)
+
+            - chunk_size (int): The amount of data to be bulk updated in a single loop
+
+            - refresh (Literal["true", "wait_for"]): Refresh parameter for Elasticsearch update/index API
+
+        Returns
+        -------
+            Response
+        """
+
         self._check_authen()
-        pass
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_index")
+        es_url += f"?refresh={refresh}"
+
+        if routing_key:
+            es_url += f"&routing={routing_key}"
+
+        i = 0
+        while i < len(data):
+            data_chunk = data[i : i + chunk_size]
+            bulk_payload = self.generate_bulk_payload(
+                index_name, data_chunk, id_key=id_key
+            )
+
+            headers = self.headers.copy()
+            headers["Content-Type"] = "application/json"
+
+            # Send bulk request
+            response = requests.post(es_url, headers=headers, data=bulk_payload)
+
+            if response.status_code != 200:
+                print(
+                    f"Error indexing batch {i} to {i + chunk_size - 1}: {response.text}"
+                )
+                return response
+            else:
+                print(f"Successfully indexed batch {i} to {i + chunk_size - 1}")
+
+            i += chunk_size
+
+        print("Finished updating all batches.")
+        r = RequestResponse(
+            status_code=200,
+            content=json.dumps({"message": "All chunks are updated successfully."}),
+        )
+        return r
 
     def bulk_update(
         self,
         index_name: str,
         data: list[dict],
-        id_key: str | None = None,
+        id_key: str,
         routing_key: str | None = None,
         chunk_size: int = 100,
         refresh: Literal["true", "wait_for"] = "true",
@@ -216,7 +273,7 @@ class ELS:
 
             - data (list[dict]): A list of dictionary data to update to the index
 
-            - id_key (str | None): Key of the dictionary data to use for documents' `_id` (Default = None)
+            - id_key (str): Key of the dictionary data to use for documents' `_id`
 
             - routing_key (str | None): Routing name (shard) for all the data in this batch (Default = None)
 
