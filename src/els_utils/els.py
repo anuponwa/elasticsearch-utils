@@ -177,7 +177,8 @@ class ELS:
     ):
         """Generates bulk payload data, for _bulk API"""
 
-        bulk_data = ""
+        # bulk_data = ""
+        lines = []
 
         for item in data:
             # First row of the bulk
@@ -189,11 +190,19 @@ class ELS:
 
             # Second row (actual data) of the bulk
             if method == "update":
-                bulk_data += f"{json.dumps(action)}\n{json.dumps({'doc': item, 'doc_as_upsert': True}, ensure_ascii=False).encode('utf-8')}\n"
+                # bulk_data += f"{json.dumps(action)}\n"
+                bulk_data = json.dumps(
+                    {"doc": item, "doc_as_upsert": True},
+                    ensure_ascii=False,
+                )
             else:
-                bulk_data += f"{json.dumps(action)}\n{json.dumps(item, ensure_ascii=False).encode('utf-8')}\n"
+                # bulk_data = json.dumps(action)}\n{
+                bulk_data = json.dumps(item, ensure_ascii=False)
 
-        return bulk_data
+            lines.append(json.dumps(action))
+            lines.append(bulk_data)
+
+        return "\n".join(lines) + "\n"
 
     def bulk_index(
         self,

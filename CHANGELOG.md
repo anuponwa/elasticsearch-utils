@@ -1,4 +1,7 @@
 # Change log
+## 0.3.6
+* Fix generate bulk payload function
+
 ## 0.3.5
 * Fix bulk payload for index method
 
