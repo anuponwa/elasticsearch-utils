@@ -169,15 +169,18 @@ class ELS:
         return create_response
 
     @staticmethod
-    def generate_bulk_payload(index_name: str, data: list[dict], id_key: str):
+    def generate_bulk_payload(index_name: str, data: list[dict], id_key: str | None):
         """Generates bulk payload data, for _bulk API"""
 
         bulk_data = ""
 
         for item in data:
             # First row of the bulk
-            _id = item[id_key]
-            action = {"update": {"_index": index_name, "_id": _id}}
+            if id_key is not None:
+                _id = item[id_key]
+                action = {"update": {"_index": index_name, "_id": _id}}
+            else:
+                action = {"update": {"_index": index_name}}
 
             # Second row (actual data) of the bulk
             bulk_data += f"{json.dumps(action)}\n{json.dumps({'doc': item, 'doc_as_upsert': True})}\n"
@@ -200,7 +203,7 @@ class ELS:
         self,
         index_name: str,
         data: list[dict],
-        id_key: str,
+        id_key: str | None = None,
         routing_key: str | None = None,
         chunk_size: int = 100,
         refresh: Literal["true", "wait_for"] = "true",
@@ -213,7 +216,7 @@ class ELS:
 
             - data (list[dict]): A list of dictionary data to update to the index
 
-            - id_key (str): Key of the dictionary data to use for documents' `_id`
+            - id_key (str | None): Key of the dictionary data to use for documents' `_id` (Default = None)
 
             - routing_key (str | None): Routing name (shard) for all the data in this batch (Default = None)
 

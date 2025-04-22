@@ -1,4 +1,7 @@
 # Change log
+## 0.3.2
+* Add support for default reindexing with `_id=None`
+
 ## 0.3.1
 * Fix return json content error
 
