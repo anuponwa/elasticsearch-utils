@@ -4,6 +4,7 @@ from requests import Response
 from .explain_utils import get_scores_summary, get_scores_terms
 from .types import (
     CatDict,
+    CountDict,
     ExplainDetailsDict,
     FieldScoreDict,
     ScoreSummaryDict,
@@ -292,6 +293,30 @@ class SearchResults:
 
     def __repr__(self):
         return f"<SearchResults total_hits={self.total}>"
+
+
+class CountResults:
+    def __init__(self, response: Response):
+        self._status_code = response.status_code
+        self._json: CountDict = response.json()
+
+    @property
+    def status_code(self) -> int:
+        """Returns status code from requests"""
+        return self._status_code
+
+    @property
+    def json(self) -> CountDict:
+        """Returns the json data"""
+        return self._json
+
+    @property
+    def count(self) -> int:
+        """Returns the documents count"""
+        return self.json["count"]
+
+    def __repr__(self):
+        return f"<CountResults count={self.count}>"
 
 
 class CatResults:

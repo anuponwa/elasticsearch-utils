@@ -215,3 +215,16 @@ class StatsResultsDict(TypedDict):
     _shards: ShardsMetadata
     _all: IndexStats
     indices: dict[str, IndexStats]
+
+
+# count results
+class CountShardsDict(TypedDict):
+    total: int
+    successful: int
+    skipped: int
+    failed: int
+
+
+class CountDict(TypedDict):
+    count: int
+    _shards: CountShardsDict

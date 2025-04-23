@@ -6,7 +6,13 @@ from typing import Literal
 import requests
 
 from .response import RequestResponse
-from .results import CatResults, SearchResults, ExplainResult, StatsResults
+from .results import (
+    CatResults,
+    CountResults,
+    SearchResults,
+    ExplainResult,
+    StatsResults,
+)
 
 
 class ELS:
@@ -415,6 +421,15 @@ class ELS:
             es_url, params=params, headers=headers, data=json.dumps(dsl)
         )
         return ExplainResult(results)
+
+    def count(self, index_name: str):
+        """Returns the documents count in the specified `index_name`"""
+
+        self._check_authen()
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_count")
+        results = requests.get(es_url, headers=self.headers)
+        return CountResults(results)
 
     def get_cat(self) -> CatResults:
         """Returns the stats of all the indices
