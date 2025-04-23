@@ -2,7 +2,13 @@ import pandas as pd
 from requests import Response
 
 from .explain_utils import get_scores_summary, get_scores_terms
-from .types import ExplainDetailsDict, FieldScoreDict, ScoreSummaryDict
+from .types import (
+    CatDict,
+    ExplainDetailsDict,
+    FieldScoreDict,
+    ScoreSummaryDict,
+    StatsResultsDict,
+)
 
 
 class ExplainResult:
@@ -181,6 +187,14 @@ class SearchResults:
 
         return self.json.get("hits", {}).get("total", {}).get("value", 0)
 
+    def get_total_hits(self):
+        """Returns a total count"""
+        return self.total
+
+    def get_hits(self) -> list[dict | None]:
+        """Returns the `hits` dict of the results"""
+        return self.hits
+
     def get_sources(
         self,
         include_id: bool = False,
@@ -278,3 +292,94 @@ class SearchResults:
 
     def __repr__(self):
         return f"<SearchResults total_hits={self.total}>"
+
+
+class CatResults:
+    def __init__(self, response: Response):
+        self._status_code = response.status_code
+        self._json: list[dict] = response.json()
+        self._json = [self._normalise_cat_keys(row) for row in self._json]
+
+    @property
+    def status_code(self) -> int:
+        """Returns status code from requests"""
+        return self._status_code
+
+    @property
+    def json(self) -> list[CatDict]:
+        """Returns the json data"""
+        return self._json
+
+    @property
+    def total(self) -> int:
+        """Returns the count"""
+        return len(self.json)
+
+    def get_total_indices(self):
+        """Returns the total indices count"""
+        return self.total
+
+    def get_indices(self) -> list[str]:
+        """Returns a list of all the indices"""
+        return [row["index"] for row in self.json]
+
+    def filter_indices(self, indices: str | list[str]):
+        """Filters the results to the specified index name(s) only"""
+
+        def _filter_results(row):
+            if isinstance(indices, str):
+                return row["index"] == indices
+            elif isinstance(indices, list):
+                return row["index"] in indices
+            else:
+                raise ValueError("indices must be either str or list[str]")
+
+        return list(filter(_filter_results, self.json))
+
+    @staticmethod
+    def _normalise_cat_keys(entry: dict) -> CatDict:
+        return {k.replace(".", "_"): v for k, v in entry.items()}
+
+    def __repr__(self):
+        return f"<CatResults total_indices={self.total}>"
+
+
+class StatsResults:
+    def __init__(self, response: Response):
+        self._status_code = response.status_code
+        self._json: dict = response.json()
+
+    @property
+    def status_code(self) -> int:
+        """Returns status code from requests"""
+        return self._status_code
+
+    @property
+    def json(self) -> StatsResultsDict:
+        """Returns the json data"""
+        return self._json
+
+    @property
+    def total(self):
+        """Returns the total documents count"""
+        return self.json["_all"]["total"]["docs"]["count"]
+
+    @property
+    def size(self):
+        """Returns the total size in bytes for the index"""
+        return self.json["_all"]["total"]["store"]["size_in_bytes"]
+
+    def get_total_count(self):
+        """Returns the total documents count"""
+        return self.total
+
+    def get_total_size(self):
+        """Returns the total size in bytes for the index"""
+        return self.size
+
+    def get_indices(self) -> list[str]:
+        """Get a list of indices within this index (maybe aliases)"""
+        return list(self.json["indices"].keys())
+
+    def __repr__(self):
+        return f"<StatsResults total_count={self.total}, total_size={self.size}>"

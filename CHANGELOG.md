@@ -1,4 +1,7 @@
 # Change log
+## 0.3.7
+* Add `get_stats()` `get_cats()` functions to get stats of the indices in the Elasticsearch server
+
 ## 0.3.6
 * Fix generate bulk payload function
 

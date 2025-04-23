@@ -11,3 +11,8 @@ wheels/
 
 # Jupyter
 *.ipynb
+
+# secrets
+secrets
+*.json
+*credentials*

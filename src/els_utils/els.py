@@ -6,7 +6,7 @@ from typing import Literal
 import requests
 
 from .response import RequestResponse
-from .results import SearchResults, ExplainResult
+from .results import CatResults, SearchResults, ExplainResult, StatsResults
 
 
 class ELS:
@@ -415,6 +415,33 @@ class ELS:
             es_url, params=params, headers=headers, data=json.dumps(dsl)
         )
         return ExplainResult(results)
+
+    def get_cat(self) -> CatResults:
+        """Returns the stats of all the indices
+
+        The `store_size` is in mb.
+
+        Returns
+        -------
+            CatResults object
+        """
+
+        self._check_authen()
+
+        es_url = ppath.join(self.es_endpoint, "_cat/indices?format=json&bytes=mb")
+        results = requests.get(es_url, headers=self.headers)
+
+        return CatResults(results)
+
+    def get_stats(self, index_name: str):
+        """Returns the detailed stats of a specific index"""
+
+        self._check_authen()
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_stats")
+        results = requests.get(es_url, headers=self.headers)
+
+        return StatsResults(results)
 
     def _check_authen(self):
         if not self.is_authen:
