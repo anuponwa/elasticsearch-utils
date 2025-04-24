@@ -1,4 +1,8 @@
 # Change log
+
+## 0.4.1
+* Fully change to elasticsearch-utils and update doc
+
 ## 0.4.0
 * Change to ES convention, the main class has been changed to `ESClient`.
 

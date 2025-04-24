@@ -1,4 +1,4 @@
-# els-utils
+# elasticsearch-utils
 
 This library provides utilities for interacting with Elasticsearch and results retrived from it.
 
@@ -11,44 +11,44 @@ The core features are:
 ## Installation
 
 ```
-uv add els-utils
+uv add elasticsearch-utils
 ```
 
 ## Example usage
 
 ### Instantiate
 ```python
-from els_utils import ELS
+from elasticsearch_utils import ESClient
 
 
 # Using API key to authenticate
-els = ELS(ES_ENDPOINT, api_key=ES_API_KEY)
+es = ESClient(ES_ENDPOINT, api_key=ES_API_KEY)
 
 # Using basic authen with username and password
-els = ELS(ES_ENDPOINT, basic_authen=(USERNAME, PASSWORD))
+es = ELS(ES_ENDPOINT, basic_authen=(USERNAME, PASSWORD))
 ```
 ### Create index
 ```python
 mapping = {"mappings": {"properties": {...}}}
 
-els.create_index(index_name="my-index", json_mapping=mapping, replace_if_exists=True)
+es.create_index(index_name="my-index", json_mapping=mapping, replace_if_exists=True)
 ```
 
 ### Bulk update
 ```python
 data = [{"some-id": "1", "field1": "some-value"}, {"some-id": "2", "field1": "another-value"}]
 
-els.bulk_update(index_name="my-index", data=data, id_key="some-id")
+es.bulk_update(index_name="my-index", data=data, id_key="some-id")
 
 # Routing option is also available if needed
-els.bulk_update(index_name="my-index", data=data, id_key="some-id", routing_key="1")
+es.bulk_update(index_name="my-index", data=data, id_key="some-id", routing_key="1")
 ```
 
 ### Results
 
 ```python
 dsl = {"query": {...}}
-results = els.search(INDEX_NAME, dsl)
+results = es.search(INDEX_NAME, dsl)
 
 # results: <SearchResults total_hits=510>
 
@@ -76,7 +76,7 @@ results.get_explanations()  # This returns a dict of {`_id`: `<ExplainResult>`}
 #### Using the `explain` API
 ```python
 dsl = {"query": {...}}
-explain = els.explain(INDEX_NAME, doc_id="75720", dsl=dsl, routing=None)
+explain = es.explain(INDEX_NAME, doc_id="75720", dsl=dsl, routing=None)
 
 # Get the JSON
 explain.json
@@ -100,7 +100,7 @@ explain.get_scores_summary()  # You can also pass in `as_df` parameter
 #### Using the explanation from the `search` API
 ```python
 dsl = {"explain": True, "query": {...}}
-results = els.search(INDEX_NAME, dsl=dsl)
+results = es.search(INDEX_NAME, dsl=dsl)
 
 # This returns a dict of {`_id`: `<ExplainResult>`}
 explanations = results.get_explanations()
