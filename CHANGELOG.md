@@ -1,4 +1,6 @@
 # Change log
+## 0.4.0
+* Change to ES convention, the main class has been changed to `ESClient`.
 
 ## 0.3.9
 * Add `update_doc()` and `index_doc()` methods to update/index a single document
