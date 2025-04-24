@@ -139,3 +139,46 @@ def get_scores_summary(
                 ret_details[key]["boost"] = max_boost
 
     return ret_details
+
+
+# Test new extraction functions
+
+
+def get_field_and_clause(text_details):
+    if match := re.search(r"weight\((\w+):(\w+) in", text_details):
+        field = match[1]
+        clause = match[2]
+
+        return field, clause
+
+
+def get_contribution_details(break_down):
+    cur_depth = 0
+    results = []
+    for i, (depth, score, details) in enumerate(break_down):
+        if details in ("sum of:", "avg of:", "max of:", "min of:"):
+            cur_depth = depth  # Set the current depth level
+            continue  # Move on to its details
+
+        if depth == cur_depth + 1:  # one level deeper than the current aggregate
+            if details.startswith("weight("):
+                try:
+                    field, clause = get_field_and_clause(details)
+
+                except Exception:
+                    print(details)
+
+                for j in range(i, len(break_down)):
+                    dtl_depth = break_down[j][0]
+                    dtl_score = break_down[j][1]
+                    dtl_detail = break_down[j][2]
+
+                    if (
+                        dtl_depth == depth + 1 and dtl_detail == "boost"
+                    ):  ## one level deeper than the main score
+                        boost = dtl_score
+                        break
+
+                results.append([field, clause, score, boost])
+
+    return results

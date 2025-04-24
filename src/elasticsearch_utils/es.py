@@ -15,7 +15,7 @@ from .results import (
 )
 
 
-class ELS:
+class ESClient:
     def __init__(
         self,
         es_endpoint: str | None = None,

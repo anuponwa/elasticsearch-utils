@@ -1,4 +1,4 @@
-from .es import ELS
+from .es import ESClient
 from .version import __version__
 
-__all__ = ["ELS"]
+__all__ = ["ESClient"]

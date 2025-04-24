@@ -237,8 +237,8 @@ wheels = [
 ]
 
 [[package]]
-name = "els-utils"
-version = "0.1.0"
+name = "elasticsearch-utils"
+version = "0.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "pandas" },
