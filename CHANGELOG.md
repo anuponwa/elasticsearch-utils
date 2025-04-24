@@ -1,5 +1,8 @@
 # Change log
 
+## 0.3.9
+* Add `update_doc()` and `index_doc()` methods to update/index a single document
+
 ## 0.3.8
 * Add `count()` method
 

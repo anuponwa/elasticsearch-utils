@@ -208,12 +208,12 @@ class ELS:
 
         index_response = requests.post(es_url, headers=index_headers, json=doc_data)
 
-        if index_response.status_code == 200:
+        if index_response.status_code in (200, 201):
             print(f"The data has been successfully indexed into {index_name}")
 
         return index_response
 
-    def update_doc(self, index_name: str, doc_data: dict, _id: str):
+    def update_doc(self, index_name: str, doc_data: dict, _id: str, detect_noop: bool = True, doc_as_upsert: bool = True):
         """Update one document to the specified index
 
         Parameters
@@ -229,6 +229,12 @@ class ELS:
 
             If None is provided, the `_id` of the document will be auto-generated.
 
+        detect_noop: bool (Default = True)
+            If `True`, the result in the response is set to noop (no operation) when there are no changes to the document
+
+        doc_as_upsert: bool (Default = True)
+            If True, use the contents of `doc_data` as the value of upsert operation
+
         Returns
         -------
         Response
@@ -240,15 +246,20 @@ class ELS:
         index_headers = self.headers.copy()
         index_headers["Content-Type"] = "application/json"
 
-        es_url = ppath.join(self.es_endpoint, index_name, "_doc", {_id}, "_update")
+        es_url = ppath.join(self.es_endpoint, index_name, "_update", _id)
 
-        update_response = requests.post(es_url, headers=index_headers, json=doc_data)
+        json_body = {
+            "detect_noop": detect_noop,
+            "doc_as_upsert": doc_as_upsert,
+            "doc": doc_data,
+        }
+
+        update_response = requests.post(es_url, headers=index_headers, json=json_body)
 
         if update_response.status_code == 200:
             print(f"The doc_id: {_id} has been updated at index: {index_name}")
 
         return update_response
-        
 
     @staticmethod
     def generate_bulk_payload(
