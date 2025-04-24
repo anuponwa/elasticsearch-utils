@@ -174,6 +174,82 @@ class ELS:
 
         return create_response
 
+    def index_doc(self, index_name: str, doc_data: dict, _id: str | None = None):
+        """Index one document to the specified index
+
+        Parameters
+        ----------
+        index_name: str
+            Index name to put/index data into
+
+        doc_data: dict
+            The data in JSON/dict format with the correct fields as the mapping
+
+        _id: str | None (Default = None)
+            The _id for the Elasticsearch index
+
+            If None is provided, the `_id` of the document will be auto-generated.
+
+        Returns
+        -------
+        Response
+            The response of this index operation call
+        """
+
+        self._check_authen()
+
+        index_headers = self.headers.copy()
+        index_headers["Content-Type"] = "application/json"
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_doc")
+        if _id:
+            es_url += f"/{_id}"
+            index_response = requests.put(es_url, headers=index_headers, json=doc_data)
+
+        index_response = requests.post(es_url, headers=index_headers, json=doc_data)
+
+        if index_response.status_code == 200:
+            print(f"The data has been successfully indexed into {index_name}")
+
+        return index_response
+
+    def update_doc(self, index_name: str, doc_data: dict, _id: str):
+        """Update one document to the specified index
+
+        Parameters
+        ----------
+        index_name: str
+            Index name to update data into
+
+        doc_data: dict
+            The data in JSON/dict format with the correct fields as the mapping
+
+        _id: str
+            The _id to update
+
+            If None is provided, the `_id` of the document will be auto-generated.
+
+        Returns
+        -------
+        Response
+            The response of this update operation call
+        """
+
+        self._check_authen()
+
+        index_headers = self.headers.copy()
+        index_headers["Content-Type"] = "application/json"
+
+        es_url = ppath.join(self.es_endpoint, index_name, "_doc", {_id}, "_update")
+
+        update_response = requests.post(es_url, headers=index_headers, json=doc_data)
+
+        if update_response.status_code == 200:
+            print(f"The doc_id: {_id} has been updated at index: {index_name}")
+
+        return update_response
+        
+
     @staticmethod
     def generate_bulk_payload(
         index_name: str,
