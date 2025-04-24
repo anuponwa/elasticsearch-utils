@@ -1,5 +1,5 @@
 [project]
-name = "els-utils"
+name = "es-utils"
 version = "0.3.9"
 description = "A simple wrapper for Elasticsearch tool"
 readme = "README.md"
