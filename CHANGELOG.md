@@ -1,4 +1,8 @@
 # Change log
+## 0.5.0
+* Re-design the `ExplainResults` object methods
+* Support the more correct and insightful flatten, details and summary of the scores
+
 ## 0.4.2
 * Fix the main import `ESClient`
 * Add count with DSL functionality

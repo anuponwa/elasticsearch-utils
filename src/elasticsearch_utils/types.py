@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict, NotRequired
+from typing import TypedDict, NotRequired
 
 
 class ExplainDetailsDict(TypedDict):
@@ -7,16 +7,16 @@ class ExplainDetailsDict(TypedDict):
     details: list["ExplainDetailsDict"]
 
 
-class FieldScoreDict(TypedDict):
-    field: str
-    clause: str
-    type: Literal[r"value", "boost", "idf", "tf"]
-    value: int | float
+# class FieldScoreDict(TypedDict):
+#     field: str
+#     clause: str
+#     type: Literal[r"value", "boost", "idf", "tf"]
+#     value: int | float
 
 
-class ScoreSummaryDict(TypedDict):
-    value: float
-    boost: float
+# class ScoreSummaryDict(TypedDict):
+#     value: float
+#     boost: float
 
 
 # Results from _cat

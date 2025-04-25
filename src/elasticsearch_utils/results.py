@@ -1,13 +1,11 @@
 import pandas as pd
 from requests import Response
 
-from .explain_utils import get_scores_summary, get_scores_terms
+from .explain_utils import get_explanation_contribution_details
 from .types import (
     CatDict,
     CountDict,
     ExplainDetailsDict,
-    FieldScoreDict,
-    ScoreSummaryDict,
     StatsResultsDict,
 )
 
@@ -46,6 +44,9 @@ class ExplainResult:
         else:
             raise TypeError("Unsupported input type for ExplainResult")
 
+        self._flatten_explanation = None
+        self._field_details = None
+
     @property
     def status_code(self) -> int:
         """Returns the `status_code`"""
@@ -66,7 +67,7 @@ class ExplainResult:
         """Returns the final score"""
         return self.explanation.get("value")
 
-    def get_scores_breakdown(self, as_df: bool = False) -> list | pd.DataFrame:
+    def flatten_explanation(self, as_df: bool = False) -> list | pd.DataFrame:
         """Gets a breakdown of the scores structure with depth and its information
 
         Parameters
@@ -78,66 +79,49 @@ class ExplainResult:
             list | pd.DataFrame
         """
 
-        result = []
+        if not self._flatten_explanation:
+            result = []
 
-        def walk(node, depth=0):
-            desc = node.get("description", "")
-            val = node.get("value", 0)
-            result.append((depth, val, desc))
-            for detail in node.get("details", []):
-                walk(detail, depth + 1)
+            def walk(node, depth=0):
+                desc = node.get("description", "")
+                val = node.get("value", 0)
+                result.append((depth, val, desc))
+                for detail in node.get("details", []):
+                    walk(detail, depth + 1)
 
-        walk(self.explanation)
-        if as_df:
-            return pd.DataFrame(result, columns=["depth", "score", "description"])
+            walk(self.explanation)
 
-        return result
-
-    def get_scores_term(
-        self, as_df: bool = False
-    ) -> list[FieldScoreDict] | pd.DataFrame:
-        """Returns the tf, idf, boost for each field
-
-        Parameters
-        ----------
-            - as_df (bool): Whether or not to return the results in DataFrame (Default = False)
-
-        Returns
-        -------
-            list[FieldScoreDict] | pd.DataFrame
-        """
-
-        list_score_terms = get_scores_terms(self.explanation)
+            self._flatten_explanation = result
 
         if as_df:
-            return pd.DataFrame(list_score_terms)
+            return pd.DataFrame(
+                self._flatten_explanation, columns=["depth", "score", "description"]
+            )
 
-        return list_score_terms
+        return self._flatten_explanation
 
-    def get_scores_summary(
-        self, as_df: bool = False
-    ) -> dict[str, ScoreSummaryDict] | pd.DataFrame:
-        """Returns the summary for each term's contributions
+    def get_field_details(self) -> pd.DataFrame:
+        """Returns the field/contribution details of the score explanation"""
 
-        Parameters
-        ----------
-            - as_df (bool): Whether or not to return the summary in DataFrame (Default = False)
+        if not self._field_details:
+            if not self._flatten_explanation:
+                self.flatten_explanation()
 
-        Returns
-        -------
-            dict[str, ScoreSummaryDict] | pd.DataFrame
-        """
+            results = get_explanation_contribution_details(
+                self._flatten_explanation, as_df=True
+            )
 
-        list_score_terms = self.get_scores_term()
-        score_summary_results = get_scores_summary(list_score_terms)
+            self._field_details = results
 
-        if as_df:
-            df = pd.DataFrame(score_summary_results).transpose()
-            df.index.name = "field"
+        return self._field_details
 
-            return df
+    def get_field_summary(self) -> pd.DataFrame:
+        """Returns the summary of the contribution of each field"""
 
-        return score_summary_results
+        if not self._field_details:
+            self.get_field_details()
+
+        return self._field_details.groupby(["field", "type", "boost"])[["score"]].sum()
 
     def __repr__(self):
         return f"<ExplainResult explanation_value={self.score}>"

@@ -87,14 +87,11 @@ explain.score
 # Get the explanation dict
 explain.explanation
 
-# Get scores breakdown
-explain.get_scores_breakdown(as_df=False)  # If you wish to return a DataFrame, can pass `as_df=True`
-
-# Get the scores terms, e.g., tf, idf, boost for each field
-explain.get_scores_term(as_df=False)
+# Get the scores terms, e.g., field, term, score, boost, etc.
+explain.get_field_details()
 
 # Get the contributions summary for each field
-explain.get_scores_summary()  # You can also pass in `as_df` parameter
+explain.get_field_summary()
 ```
 
 #### Using the explanation from the `search` API
@@ -106,5 +103,5 @@ results = es.search(INDEX_NAME, dsl=dsl)
 explanations = results.get_explanations()
 
 # You can do the same thing as the `ExplainResult` for each item
-explanations["75720"].get_scores_term()  # Given that the key "75720" exists in the results
+explanations["75720"].get_field_summary()  # Given that the key "75720" exists in the results
 ```
