@@ -1,4 +1,7 @@
 # Change log
+## 0.4.2
+* Fix the main import `ESClient`
+* Add count with DSL functionality
 
 ## 0.4.1
 * Fully change to elasticsearch-utils and update doc

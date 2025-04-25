@@ -213,7 +213,14 @@ class ESClient:
 
         return index_response
 
-    def update_doc(self, index_name: str, doc_data: dict, _id: str, detect_noop: bool = True, doc_as_upsert: bool = True):
+    def update_doc(
+        self,
+        index_name: str,
+        doc_data: dict,
+        _id: str,
+        detect_noop: bool = True,
+        doc_as_upsert: bool = True,
+    ):
         """Update one document to the specified index
 
         Parameters
@@ -509,13 +516,36 @@ class ESClient:
         )
         return ExplainResult(results)
 
-    def count(self, index_name: str):
-        """Returns the documents count in the specified `index_name`"""
+    def count(self, index_name: str, dsl: dict | None = None):
+        """Returns the documents count in the specified `index_name`
+
+        Parameters
+        ----------
+        index_name: str
+            Index to count from
+
+        dsl: dict | None (Default = None)
+            DSL query you want to count the results of. If None, return the whole documents count.
+
+        Returns
+        -------
+        CountResults
+            CountResults object
+        """
 
         self._check_authen()
 
         es_url = ppath.join(self.es_endpoint, index_name, "_count")
-        results = requests.get(es_url, headers=self.headers)
+        if not dsl or not isinstance(dsl, dict):
+            results = requests.get(es_url, headers=self.headers)
+            return CountResults(results)
+
+        headers = self.headers.copy()
+        headers["Content-Type"] = "application/json"
+
+        dsl = {"query": dsl["query"]}
+
+        results = requests.post(es_url, headers=headers, data=json.dumps(dsl))
         return CountResults(results)
 
     def get_cat(self) -> CatResults:
