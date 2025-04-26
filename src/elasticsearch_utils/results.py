@@ -16,9 +16,9 @@ class ExplainResult:
     Methods
     -------
     These methods are available:
-        - `self.get_scores_breakdown(as_df: bool = False)`
-        - `self.get_scores_term(as_df: bool = False)`
-        - `self.get_scores_summary(as_df: bool = False)`
+        - `self.flatten_explanation(as_df: bool = False)`
+        - `self.get_field_details()`
+        - `self.get_field_summary()`
 
     Attributes
     ----------
@@ -27,6 +27,8 @@ class ExplainResult:
         - `json`
         - `explanation`
         - `score`
+        - `field_details`
+        - `field_summary`
     """
 
     def __init__(self, data: Response | ExplainDetailsDict):
@@ -66,6 +68,24 @@ class ExplainResult:
     def score(self) -> float | None:
         """Returns the final score"""
         return self.explanation.get("value")
+
+    @property
+    def field_details(self) -> pd.DataFrame:
+        """Returns the field/contribution details of the score explanation
+
+        Runs the `get_field_details()` automatically, internally.
+        """
+
+        return self.get_field_details()
+
+    @property
+    def field_summary(self):
+        """Returns the summary of the contribution of each field
+
+        Runs the `get_field_summary()` automatically, internally.
+        """
+
+        return self.get_field_summary()
 
     def flatten_explanation(self, as_df: bool = False) -> list | pd.DataFrame:
         """Gets a breakdown of the scores structure with depth and its information

@@ -144,6 +144,8 @@ import pandas as pd
 
 
 def get_field_and_term_from_main(text_details: str) -> tuple[str, str]:
+    """Get the field and matched term from the main weight() tf*idf score"""
+
     text_split = text_details.split("weight(")[1].split(":")
     field = text_split[0]
     term = text_split[1].split(" in")[0]
@@ -151,6 +153,8 @@ def get_field_and_term_from_main(text_details: str) -> tuple[str, str]:
 
 
 def get_field_and_term_from_boost(text_details: str) -> tuple[str, str]:
+    """Get the field, term and the boost from keywork/boost score type"""
+
     text_split = text_details.split(":")
     field = text_split[0]
     term_boost = text_split[1].split("*^")
@@ -160,6 +164,8 @@ def get_field_and_term_from_boost(text_details: str) -> tuple[str, str]:
 
 
 def get_field_and_terms_from_synonym(text_details: str) -> tuple[str, list[str]]:
+    """Get the field and matched terms from the synonym score"""
+
     inner = text_details.split("Synonym(")[1].split(")")[0]
     parts = inner.strip().split()
     field = parts[0].split(":")[0]
@@ -177,6 +183,42 @@ def get_field_and_terms_from_synonym(text_details: str) -> tuple[str, list[str]]
 def get_explanation_contribution_details(
     break_down: list[tuple[int, float, str]], as_df: bool = False
 ) -> list[dict] | pd.DataFrame:
+    """Returns the contribution details of each field from the flatten explanation
+    
+    Parameters
+    ----------
+    break_down: list[tuple[int, float, str]]
+        The break-down, flatten explanation structure that has:
+
+        `[depth, score, details]` format.
+
+    as_df: bool (Default = False)
+        Whether or not to return this as a DataFrame
+
+    Returns
+    -------
+    list[dict] | pd.DataFrame
+        A detailed contribution structure, for example:
+
+        ```
+        [
+            {
+                "id": 1,
+                "type": "Weight",
+                "field": "name",
+                "term": "some-product",
+                "score": 314.159,
+                "boost": 2.2,
+                "depth": 3,
+                "op": None,
+                "parent_depth": 1,
+                "parent_id": 1,
+                "parent_op": "sum"
+            }
+        ]
+        ```
+    """
+
     results = []
     for i, (depth, score, details) in enumerate(break_down):
         if details in ("sum of:", "avg of:", "max of:", "min of:"):
@@ -246,7 +288,6 @@ def get_explanation_contribution_details(
                             dtl_depth == child_depth + 2 and dtl_detail == "boost"
                         ):  ## two level deeper than the main score
                             boost = dtl_score
-                            # break
 
                     contrib_dict = {
                         "id": i_,

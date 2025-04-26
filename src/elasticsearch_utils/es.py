@@ -516,7 +516,7 @@ class ESClient:
         )
         return ExplainResult(results)
 
-    def count(self, index_name: str, dsl: dict | None = None):
+    def count(self, index_name: str, dsl: dict | None = None) -> CountResults:
         """Returns the documents count in the specified `index_name`
 
         Parameters

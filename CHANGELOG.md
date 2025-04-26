@@ -1,4 +1,8 @@
 # Change log
+## 0.5.1
+* Provide more attributes in `ExplainResults`
+* Add docs to some functions
+
 ## 0.5.0
 * Re-design the `ExplainResults` object methods
 * Support the more correct and insightful flatten, details and summary of the scores
